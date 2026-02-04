@@ -7,6 +7,8 @@ if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'admin') {
     exit;
 }
 
+
+
 // Include header USER
 require_once '../includes/header_user.php';
 
@@ -41,7 +43,7 @@ $total = 0;
     <td>
         <a href="remove.php?id=<?= $item['id'] ?>"
            class="btn btn-danger btn-sm"
-           onclick="return confirm('Remove this item?')">
+           onclick="return confirm('Xóa sản phẩm này khỏi giỏ hàng?')">
            Remove
         </a>
     </td>
@@ -55,7 +57,23 @@ $total = 0;
 </tr>
 </table>
 
-<a href="checkout.php" class="btn btn-primary">Checkout</a>
+<a href="checkout.php" class="btn btn-primary" style="background-color: #20b462; border: none;">Checkout</a>
+
+<!-- <?php if (isset($_SESSION['user'])): ?>
+    ĐÃ LOGIN
+    <a href="checkout.php"
+       class="btn btn-primary"
+       style="background-color:#20b462;border:none;">
+        Checkout
+    </a>
+<?php else: ?>
+    CHƯA LOGIN
+    <a href="guest_checkout.php"
+       class="btn btn-warning">
+        Checkout as Guest
+    </a>
+<?php endif; ?> -->
+
 
 <?php endif; ?>
 

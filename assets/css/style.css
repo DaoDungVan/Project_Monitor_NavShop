@@ -13,3 +13,7 @@ body {
 .navbar {
     margin-bottom: 30px;
 }
+
+.bg-dark{
+    background-color: blue;
+}

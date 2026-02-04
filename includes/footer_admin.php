@@ -1,6 +1,6 @@
     </div> <!-- đóng container mở trong header_admin -->
 
-    <footer class="bg-secondary text-light mt-auto border-top">
+    <footer class=" text-light mt-auto border-top" style="background-color: #024487;">
         <div class="container py-3">
             <div class="row align-items-center">
 

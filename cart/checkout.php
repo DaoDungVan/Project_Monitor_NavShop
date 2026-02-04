@@ -2,6 +2,15 @@
 session_start();
 require_once '../config/db.php';
 
+// Chưa đăng nhập thì không cho checkout
+if (!isset($_SESSION['user'])) {
+    // Lưu thông báo vào session
+    $_SESSION['error'] = 'Please login to checkout your order.';
+    
+    header('Location: ../auth/login.php');
+    exit;
+}
+
 $cart = $_SESSION['cart'] ?? [];
 
 if (!empty($cart)) {

@@ -126,7 +126,7 @@ require_once '../includes/header_user.php';
     </div>
 
     <div class="col-md-3">
-        <select name="resolution" class="form-control">
+        <select name="resolution" class="form-control" style="margin-top: 15px;">
             <option value="">All Resolution</option>
             <option value="FHD" <?= $resolution == 'FHD' ? 'selected' : '' ?>>Full HD</option>
             <option value="2K" <?= $resolution == '2K' ? 'selected' : '' ?>>2K</option>
@@ -135,7 +135,7 @@ require_once '../includes/header_user.php';
     </div>
 
     <div class="col-md-3">
-        <select name="panel" class="form-control">
+        <select name="panel" class="form-control" style="margin-top: 15px;">
             <option value="">All Panel</option>
             <option value="IPS" <?= $panel == 'IPS' ? 'selected' : '' ?>>IPS</option>
             <option value="VA" <?= $panel == 'VA' ? 'selected' : '' ?>>VA</option>
@@ -143,8 +143,8 @@ require_once '../includes/header_user.php';
         </select>
     </div>
 
-    <div class="col-md-3">
-        <button class="btn btn-primary w-100">Filter</button>
+    <div class="col-md-3" style="margin-top: 15px;">
+        <button style="background-color: #20b462; border: none;" class="btn btn-primary w-100">Filter</button>
     </div>
 
 </form>
@@ -157,38 +157,44 @@ require_once '../includes/header_user.php';
     <?php endif; ?>
 
     <?php foreach ($products as $product): ?>
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
+        <div class="col-md-4 mb-4" >
+            <div class="card h-100" style="border-radius: 15px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
 
                 <?php if (!empty($product['image'])): ?>
-                    <img src="../<?= htmlspecialchars($product['image']) ?>"
-                        class="card-img-top"
-                        style="height:200px; object-fit:contain;">
+                    <a href="show.php?id=<?= $product['id'] ?>">
+                        <img src="../<?= htmlspecialchars($product['image']) ?>"
+                            alt="<?= htmlspecialchars($product['name']) ?>"
+                            class="card-img-top"
+                            style="height:200px; object-fit:contain;">
+                    </a>
                 <?php endif; ?>
 
                 <div class="card-body">
                     <h5 class="card-title">
-                        <?= htmlspecialchars($product['name']) ?>
+                        <h5>
+                            <a style="text-decoration: none; color: inherit;" href="show.php?id=<?= $product['id'] ?>">
+                                <?= htmlspecialchars($product['name']) ?>
+                            </a>
+                        </h5>
+
                     </h5>
 
-                    <p class="card-text">
-                        Brand: <?= htmlspecialchars($product['brand']) ?><br>
-                        Size: <?= $product['size'] ?> inch<br>
-                        Resolution: <?= htmlspecialchars($product['resolution']) ?><br>
-                        Panel: <?= htmlspecialchars($product['panel']) ?><br>
-                        Type: <?= $product['is_curved'] ? 'Curved' : 'Flat' ?>
-                    </p>
+                    <div style="background-color: #e9e9e9; padding: 10px; border-radius: 15px; margin-bottom: 10px; 
+                    display: flex; justify-content: center; align-items: flex-start; gap: 70px;">
+                        <p class="card-text">
+                            Brand: <?= htmlspecialchars($product['brand']) ?><br>
+                            Size: <?= $product['size'] ?> inch<br>
+                            Resolution: <?= htmlspecialchars($product['resolution']) ?><br>
+                        </p>
+                        <p class="card-text">
+                            Panel: <?= htmlspecialchars($product['panel']) ?><br>
+                            Screen: <?= $product['is_curved'] ? 'Curved' : 'Flat' ?>
+                        </p>
+                    </div>
 
-                    <strong style="color:#E30019">
+                    <strong style="color:#E30019; text-align: center; display: block;">
                         <?= number_format($product['price']) ?> VND
                     </strong>
-                </div>
-
-                <div class="card-footer text-center">
-                    <a href="../cart/add.php?id=<?= $product['id'] ?>"
-                        class="btn btn-success btn-sm">
-                        Add to cart
-                    </a>
                 </div>
 
             </div>
@@ -203,8 +209,8 @@ require_once '../includes/header_user.php';
         <ul class="pagination justify-content-center">
 
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <li class="page-item <?= $i == $page ? 'active' : '' ?>">
-                    <a class="page-link"
+                <li class="page-item <?= $i == $page ? 'active' : '' ?>" style="background-color: ;">
+                    <a  class="page-link"
                         href="?page=<?= $i ?>
                         &keyword=<?= urlencode(trim($keyword)) ?>
                         &size=<?= urlencode(trim($size)) ?>

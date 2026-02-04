@@ -22,7 +22,7 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 <body class="d-flex flex-column min-vh-100">
 
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark " style="background-color: #024487;">
         <div class="container">
 
             <a class="navbar-brand" href="/Project_Monitor_NavShop/products/admin_index.php">
@@ -45,10 +45,10 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 
             </ul>
 
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item">
                     <span class="navbar-text me-3">
-                        Admin: <?= htmlspecialchars($_SESSION['user']['name']) ?>
+                        Logged: <?= htmlspecialchars($_SESSION['user']['name']) ?>
                     </span>
                 </li>
                 <li class="nav-item">

@@ -1,6 +1,6 @@
     </div> <!-- đóng container mở trong header -->
 
-    <footer class="bg-dark text-light mt-auto">
+    <footer class="text-light mt-auto" style="background-color: #20b462;">
         <div class="container py-4">
             <div class="row">
 

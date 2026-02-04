@@ -33,7 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user'] = [
                 'id'   => $user['id'],
                 'name' => $user['name'],
-                'role' => $user['role']
+                'role' => $user['role'],
+                'avatar' => $user['avatar'] ?? null
             ];
 
             if ($user['role'] === 'admin') {
@@ -54,7 +55,12 @@ require_once '../includes/header_user.php';
 ?>
 
 <h2>Login</h2>
-
+<?php if (!empty($_SESSION['error'])): ?>
+    <div class="alert alert-warning">
+        <?= $_SESSION['error'] ?>
+    </div>
+    <?php unset($_SESSION['error']); ?>
+<?php endif; ?>
 <?php if ($error): ?>
     <div class="alert alert-danger">
         <?= htmlspecialchars($error) ?>
@@ -72,8 +78,8 @@ require_once '../includes/header_user.php';
         <input type="password" name="password" class="form-control" required>
     </div>
 
-    <button class="btn btn-primary">Login</button>
-    <a href="register.php" class="btn btn-link">Register</a>
+    <button class="btn btn-primary" style="background-color: #20b462; border: none;">Login</button>
+    <a href="register.php" class="btn btn-link" style="text-decoration: none;">You don't have an account? Register</a>
 </form>
 
 <?php require_once '../includes/footer.php'; ?>

@@ -92,7 +92,7 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
     <div class="col-md-3">
-        <button class="btn btn-primary w-100">Filter</button>
+        <button class="btn btn-primary w-100" style="background-color: #024487; border: none;">Filter</button>
     </div>
 
 </form>

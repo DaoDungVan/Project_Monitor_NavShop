@@ -83,7 +83,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         // Cập nhật lại session name
-        $_SESSION['user']['name'] = $name;
+        $_SESSION['user']['name'] = $name; 
+        $_SESSION['user']['avatar'] = $avatarPath; // câp nhật avatar trong session
 
         $success = 'Profile updated successfully';
 
@@ -155,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <button class="btn btn-primary">Update Profile</button>
 </form>
-<a href="change_password.php" class="btn btn-warning mt-3">
+<a href="change_password.php" class="btn btn-warning mt-3" style="margin-bottom: 30px;">
     Change Password
 </a>
 

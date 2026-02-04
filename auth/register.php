@@ -95,8 +95,8 @@ require_once '../includes/header_user.php';
         <input type="password" name="password" class="form-control" required>
     </div>
 
-    <button class="btn btn-primary">Register</button>
-    <a href="login.php" class="btn btn-link">Login</a>
+    <button class="btn btn-primary" style="background-color: #20b462; border: none;">Register</button>
+    <a href="login.php" class="btn btn-link" style="text-decoration: none;">Already have an account? Login</a>
 </form>
 
 <?php require_once '../includes/footer.php'; ?>
