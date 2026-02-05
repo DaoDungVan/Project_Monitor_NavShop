@@ -52,7 +52,7 @@ $totalProducts = $stmtCount->fetchColumn();
 $totalPages = ceil($totalProducts / $limit);
 
 // ================= SELECT =================
-$sql = "SELECT * FROM products" . $where . " ORDER BY created_at DESC LIMIT $limit OFFSET $offset";
+$sql = "SELECT * FROM products" . $where . " ORDER BY created_at LIMIT $limit OFFSET $offset";
 $stmt = $conn->prepare($sql);
 $stmt->execute($params);
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);

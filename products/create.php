@@ -27,8 +27,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $resolution === '' || $panel === '' || $price === ''
     ) {
         $error = 'Please fill all required fields';
-    } else {
+    }
 
+    // ================= VALIDATE PRICE =================
+    // Giá phải là số và lớn hơn 0
+    else if (!is_numeric($price) || $price <= 0) {
+        $error = 'Price must be greater than 0';
+    }
+
+    else {
+
+        // ================= CHECK TRÙNG TÊN =================
         $stmt = $conn->prepare("SELECT id FROM products WHERE name = ?");
         $stmt->execute([$name]);
 
@@ -62,10 +71,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Insert sản phẩm vào database
             $stmt = $conn->prepare("
-            INSERT INTO products 
-            (name, brand, size, resolution, panel, is_curved, price, image, description)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
+                INSERT INTO products 
+                (name, brand, size, resolution, panel, is_curved, price, image, description)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
 
             $stmt->execute([
                 $name,
@@ -98,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php endif; ?>
 
 <!-- Form thêm sản phẩm -->
-<form method="POST" enctype="multipart/form-data">
+<form method="POST" enctype="multipart/form-data" style="margin-bottom: 20px;">
 
     <div class="mb-3">
         <label>Product Name</label>
@@ -165,4 +174,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <a href="admin_index.php" class="btn btn-secondary">Back</a>
 
 </form>
+
 <?php require_once '../includes/footer_admin.php'; ?>

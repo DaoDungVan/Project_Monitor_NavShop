@@ -48,7 +48,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $resolution === '' || $panel === '' || $price === ''
     ) {
         $error = 'Please fill all required fields';
-    } else {
+    }
+
+    // ================= VALIDATE PRICE =================
+    // Giá phải là số và lớn hơn 0
+    else if (!is_numeric($price) || $price <= 0) {
+        $error = 'Price must be greater than 0';
+    }
+
+    else {
 
         // ================= CHECK TRÙNG TÊN SẢN PHẨM (TRỪ CHÍNH NÓ) =================
         $stmt = $conn->prepare("
@@ -203,5 +211,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <a href="admin_index.php" class="btn btn-secondary">Back</a>
 
 </form>
-<?php require_once '../includes/footer_admin.php'; ?>
 
+<?php require_once '../includes/footer_admin.php'; ?>
