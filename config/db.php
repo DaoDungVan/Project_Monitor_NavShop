@@ -1,8 +1,8 @@
 <?php
-$host = 'localhost';
-$dbname = 'navshop';   // TÊN DATABASE trong phpMyAdmin
-$username = 'root';
-$password = '';        // XAMPP mặc định rỗng
+$host = 'sql110.ezyro.com';
+$dbname = 'ezyro_41372587_navshop';   // TÊN DATABASE trong phpMyAdmin
+$username = 'ezyro_41372587';
+$password = '0a80218f197b4a11';        // XAMPP mặc định rỗng
 
 try {
     $conn = new PDO(
