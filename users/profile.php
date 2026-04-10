@@ -1,163 +1,120 @@
 <?php
-// ================= PROFILE USER =================
 session_start();
 
-// Chưa login thì đá về login
 if (!isset($_SESSION['user'])) {
     header('Location: ../auth/login.php');
     exit;
 }
 
-// Kết nối database
 require_once '../config/db.php';
+require_once '../includes/upload.php';
 
-$userId = $_SESSION['user']['id'];
-$error = '';
+$userId  = $_SESSION['user']['id'];
+$error   = '';
 $success = '';
 
-// Lấy thông tin user hiện tại
 $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->execute([$userId]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Nếu không có user (phòng trường hợp lỗi)
 if (!$user) {
     header('Location: ../auth/logout.php');
     exit;
 }
 
-// Khi user submit form
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    // Lấy dữ liệu từ form
-    $name    = trim($_POST['name'] ?? '');
-    $phone   = trim($_POST['phone'] ?? '');
-    $address = trim($_POST['address'] ?? '');
-    $gender  = $_POST['gender'] ?? null;
-
-    // Giữ avatar cũ mặc định
+    $name       = trim($_POST['name'] ?? '');
+    $phone      = trim($_POST['phone'] ?? '');
+    $address    = trim($_POST['address'] ?? '');
+    $gender     = $_POST['gender'] ?? null;
     $avatarPath = $user['avatar'];
 
-    // Validate
     if ($name === '') {
-        $error = 'Name is required';
+        $error = 'Name is required.';
     } else {
-
-        // ================= UPLOAD AVATAR =================
         if (!empty($_FILES['avatar']['name'])) {
-
-            // Đổi tên ảnh để tránh trùng
-            $avatarName = time() . '_' . $_FILES['avatar']['name'];
-            $uploadDir = '../uploads/avatars/';
-            $targetPath = $uploadDir . $avatarName;
-
-            if (move_uploaded_file($_FILES['avatar']['tmp_name'], $targetPath)) {
-
-                // Xoá avatar cũ nếu có
-                if (!empty($user['avatar']) && file_exists('../' . $user['avatar'])) {
-                    unlink('../' . $user['avatar']);
-                }
-
-                $avatarPath = 'uploads/avatars/' . $avatarName;
+            $newAvatarPath = save_uploaded_image('avatar', '../uploads/avatars', 'uploads/avatars', $error);
+            if ($error === '' && $newAvatarPath !== null) {
+                delete_uploaded_file($user['avatar'] ?? null);
+                $avatarPath = $newAvatarPath;
             }
         }
 
-        // ================= UPDATE USER =================
-        $stmt = $conn->prepare("
-            UPDATE users SET
-                name = ?,
-                phone = ?,
-                address = ?,
-                gender = ?,
-                avatar = ?
-            WHERE id = ?
-        ");
+        if ($error === '') {
+            $stmt = $conn->prepare("UPDATE users SET name=?, phone=?, address=?, gender=?, avatar=? WHERE id=?");
+            $stmt->execute([$name, $phone, $address, $gender, $avatarPath, $userId]);
 
-        $stmt->execute([
-            $name,
-            $phone,
-            $address,
-            $gender,
-            $avatarPath,
-            $userId
-        ]);
+            $_SESSION['user']['name']   = $name;
+            $_SESSION['user']['avatar'] = $avatarPath;
 
-        // Cập nhật lại session name
-        $_SESSION['user']['name'] = $name; 
-        $_SESSION['user']['avatar'] = $avatarPath; // câp nhật avatar trong session
+            $success = 'Profile updated successfully.';
 
-        $success = 'Profile updated successfully';
-
-        // Reload lại user
-        $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
-        $stmt->execute([$userId]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        }
     }
 }
+
+require_once '../includes/header_user.php';
 ?>
 
-<?php require_once '../includes/header_user.php'; ?>
+<h1 class="page-title">My Profile</h1>
 
-<h2>User Profile</h2>
+<div class="profile-card">
 
-<?php if ($error): ?>
-    <div class="alert alert-danger"><?= $error ?></div>
-<?php endif; ?>
+    <?php if ($error):   ?><div class="alert alert-danger"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+    <?php if ($success): ?><div class="alert alert-success"><?= htmlspecialchars($success) ?></div><?php endif; ?>
 
-<?php if ($success): ?>
-    <div class="alert alert-success"><?= $success ?></div>
-<?php endif; ?>
+    <form method="POST" enctype="multipart/form-data">
 
-<form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" name="name" class="form-control"
+                   value="<?= htmlspecialchars($user['name']) ?>" required>
+        </div>
 
-    <div class="mb-3">
-        <label>Name</label>
-        <input type="text" name="name" class="form-control"
-            value="<?= htmlspecialchars($user['name']) ?>" required>
-    </div>
+        <div class="form-group">
+            <label>Email (read-only)</label>
+            <input type="email" class="form-control" value="<?= htmlspecialchars($user['email']) ?>" readonly>
+        </div>
 
-    <div class="mb-3">
-        <label>Email (readonly)</label>
-        <input type="email" class="form-control"
-            value="<?= htmlspecialchars($user['email']) ?>" readonly>
-    </div>
+        <div class="form-group">
+            <label>Phone</label>
+            <input type="text" name="phone" class="form-control"
+                   value="<?= htmlspecialchars($user['phone'] ?? '') ?>">
+        </div>
 
-    <div class="mb-3">
-        <label>Phone</label>
-        <input type="text" name="phone" class="form-control"
-            value="<?= htmlspecialchars($user['phone']) ?>">
-    </div>
+        <div class="form-group">
+            <label>Address</label>
+            <input type="text" name="address" class="form-control"
+                   value="<?= htmlspecialchars($user['address'] ?? '') ?>">
+        </div>
 
-    <div class="mb-3">
-        <label>Address</label>
-        <input type="text" name="address" class="form-control"
-            value="<?= htmlspecialchars($user['address']) ?>">
-    </div>
+        <div class="form-group">
+            <label>Gender</label>
+            <select name="gender" class="form-control">
+                <option value="">-- Select --</option>
+                <option value="male"   <?= ($user['gender'] ?? '') === 'male'   ? 'selected' : '' ?>>Male</option>
+                <option value="female" <?= ($user['gender'] ?? '') === 'female' ? 'selected' : '' ?>>Female</option>
+                <option value="other"  <?= ($user['gender'] ?? '') === 'other'  ? 'selected' : '' ?>>Other</option>
+            </select>
+        </div>
 
-    <div class="mb-3">
-        <label>Gender</label>
-        <select name="gender" class="form-control">
-            <option value="">-- Select --</option>
-            <option value="male" <?= $user['gender'] == 'male' ? 'selected' : '' ?>>Male</option>
-            <option value="female" <?= $user['gender'] == 'female' ? 'selected' : '' ?>>Female</option>
-            <option value="other" <?= $user['gender'] == 'other' ? 'selected' : '' ?>>Other</option>
-        </select>
-    </div>
+        <div class="form-group">
+            <label>Avatar</label><br>
+            <?php if (!empty($user['avatar'])): ?>
+                <img src="../<?= htmlspecialchars($user['avatar']) ?>" class="avatar-current" alt="Avatar">
+            <?php endif; ?>
+            <input type="file" name="avatar" class="form-control" accept="image/*">
+        </div>
 
-    <div class="mb-3">
-        <label>Avatar</label><br>
+        <div class="flex gap-2">
+            <button type="submit" class="btn btn-green">Update Profile</button>
+            <a href="change_password.php" class="btn btn-orange">Change Password</a>
+        </div>
 
-        <?php if ($user['avatar']): ?>
-            <img src="../<?= $user['avatar'] ?>" width="100" class="mb-2">
-        <?php endif; ?>
-
-        <input type="file" name="avatar" class="form-control">
-    </div>
-
-    <button class="btn btn-primary">Update Profile</button>
-</form>
-<a href="change_password.php" class="btn btn-warning mt-3" style="margin-bottom: 30px;">
-    Change Password
-</a>
+    </form>
+</div>
 
 <?php require_once '../includes/footer.php'; ?>

@@ -4,6 +4,7 @@ require_once '../middleware/admin.php';
 
 // Kết nối database
 require_once '../config/db.php';
+require_once '../includes/upload.php';
 
 // Kiểm tra có id không
 if (!isset($_GET['id'])) {
@@ -25,9 +26,7 @@ if (!$product) {
 }
 
 // Nếu có ảnh thì xoá ảnh trong thư mục uploads
-if (!empty($product['image']) && file_exists('../' . $product['image'])) {
-    unlink('../' . $product['image']);
-}
+delete_uploaded_file($product['image'] ?? null);
 
 // Xoá sản phẩm trong database
 $stmt = $conn->prepare("DELETE FROM products WHERE id = ?");

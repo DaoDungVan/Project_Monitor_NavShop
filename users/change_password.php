@@ -1,91 +1,77 @@
 <?php
-// ================= CHANGE PASSWORD =================
 session_start();
 
-// Chưa login thì đá về login
 if (!isset($_SESSION['user'])) {
     header('Location: ../auth/login.php');
     exit;
 }
 
-// Kết nối database
 require_once '../config/db.php';
 
-$userId = $_SESSION['user']['id'];
-$error = '';
+$userId  = $_SESSION['user']['id'];
+$error   = '';
 $success = '';
 
-// Khi user submit form
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
     $currentPassword = $_POST['current_password'] ?? '';
     $newPassword     = $_POST['new_password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';
 
     if ($currentPassword === '' || $newPassword === '' || $confirmPassword === '') {
-        $error = 'Please fill all fields';
+        $error = 'Please fill all fields.';
+    } elseif (strlen($newPassword) < 6) {
+        $error = 'New password must be at least 6 characters.';
     } elseif ($newPassword !== $confirmPassword) {
-        $error = 'New password and confirm password do not match';
+        $error = 'New password and confirm password do not match.';
     } else {
-
-        // Lấy mật khẩu hiện tại trong DB
         $stmt = $conn->prepare("SELECT password FROM users WHERE id = ?");
         $stmt->execute([$userId]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Check mật khẩu cũ
         if (!$user || !password_verify($currentPassword, $user['password'])) {
-            $error = 'Current password is incorrect';
+            $error = 'Current password is incorrect.';
         } else {
-
-            // Hash mật khẩu mới
-            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-
-            // Update mật khẩu
-            $stmt = $conn->prepare("
-                UPDATE users SET password = ?
-                WHERE id = ?
-            ");
-            $stmt->execute([$hashedPassword, $userId]);
-
-            $success = 'Password changed successfully';
+            $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
+            $stmt = $conn->prepare("UPDATE users SET password = ? WHERE id = ?");
+            $stmt->execute([$hashed, $userId]);
+            $success = 'Password changed successfully.';
         }
     }
 }
+
+require_once '../includes/header_user.php';
 ?>
 
-<?php require_once '../includes/header_user.php'; ?>
+<h1 class="page-title">Change Password</h1>
 
-<h2>Change Password</h2>
+<div class="profile-card">
 
-<?php if ($error): ?>
-    <div class="alert alert-danger"><?= $error ?></div>
-<?php endif; ?>
+    <?php if ($error):   ?><div class="alert alert-danger"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+    <?php if ($success): ?><div class="alert alert-success"><?= htmlspecialchars($success) ?></div><?php endif; ?>
 
-<?php if ($success): ?>
-    <div class="alert alert-success"><?= $success ?></div>
-<?php endif; ?>
+    <form method="POST">
+        <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" name="current_password" class="form-control" required>
+        </div>
 
-<form method="POST">
+        <div class="form-group">
+            <label>New Password</label>
+            <input type="password" name="new_password" class="form-control"
+                   placeholder="Min. 6 characters" required>
+        </div>
 
-    <div class="mb-3">
-        <label>Current Password</label>
-        <input type="password" name="current_password" class="form-control" required>
-    </div>
+        <div class="form-group">
+            <label>Confirm New Password</label>
+            <input type="password" name="confirm_password" class="form-control" required>
+        </div>
 
-    <div class="mb-3">
-        <label>New Password</label>
-        <input type="password" name="new_password" class="form-control" required>
-    </div>
+        <div class="flex gap-2">
+            <button type="submit" class="btn btn-green">Change Password</button>
+            <a href="profile.php" class="btn btn-gray">← Back to Profile</a>
+        </div>
+    </form>
 
-    <div class="mb-3">
-        <label>Confirm New Password</label>
-        <input type="password" name="confirm_password" class="form-control" required>
-    </div>
-
-    <button class="btn btn-primary">Change Password</button>
-    <a href="profile.php" class="btn btn-secondary">Back</a>
-
-</form>
+</div>
 
 <?php require_once '../includes/footer.php'; ?>

@@ -4,120 +4,55 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 ?>
 <!DOCTYPE html>
-<html>
-
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NavShop</title>
-
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- CSS riêng -->
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
+<body>
 
-<body class="d-flex flex-column min-vh-100">
-
-<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #20b462;">
+<nav class="navbar">
     <div class="container">
+        <div class="navbar-inner">
 
-        <!-- LOGO -->
-        <a class="navbar-brand" href="/Project_Monitor_NavShop/products/index.php">
-            NavShop
-        </a>
+            <a class="navbar-brand" href="/products/index.php">NavShop</a>
 
-        <div class="collapse navbar-collapse">
-
-            <!-- MENU TRÁI -->
-            <ul class="navbar-nav me-auto">
-
-                <li class="nav-item">
-                    <a class="nav-link" href="/Project_Monitor_NavShop/products/index.php">
-                        Shop
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="/Project_Monitor_NavShop/cart/index.php">
-                        Cart
-                    </a>
-                </li>
+            <div class="navbar-nav">
+                <a class="nav-link" href="/products/index.php">Shop</a>
+                <a class="nav-link" href="/cart/index.php">Cart</a>
 
                 <?php if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'user'): ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Project_Monitor_NavShop/users/orders.php">
-                            My Orders
-                        </a>
-                    </li>
+                    <a class="nav-link" href="/users/orders.php">My Orders</a>
                 <?php endif; ?>
-
-            </ul>
-
-            <!-- MENU PHẢI -->
-            <ul class="navbar-nav ms-auto align-items-center">
 
                 <?php if (!isset($_SESSION['user'])): ?>
-                    <!-- CHƯA LOGIN -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Project_Monitor_NavShop/auth/login.php">
-                            Login
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Project_Monitor_NavShop/auth/register.php">
-                            Register
-                        </a>
-                    </li>
-
+                    <a class="nav-link" href="/auth/login.php">Login</a>
+                    <a class="nav-link" href="/auth/register.php">Register</a>
                 <?php else: ?>
-                    <!-- ĐÃ LOGIN -->
+                    <span class="nav-text">
+                        Hi, <?= $_SESSION['user']['role'] === 'admin'
+                            ? 'Admin'
+                            : htmlspecialchars($_SESSION['user']['name']) ?>
+                    </span>
 
-                    <!-- TÊN -->
-                    <li class="nav-item me-2">
-                        <span class="navbar-text text-light">
-                            Hi,
-                            <?= $_SESSION['user']['role'] === 'admin'
-                                ? 'Admin'
-                                : htmlspecialchars($_SESSION['user']['name']) ?>
-                        </span>
-                    </li>
-
-                    <!-- AVATAR -->
                     <?php if (!empty($_SESSION['user']['avatar'])): ?>
-                        <li class="nav-item me-2">
-                            <img
-                                src="/Project_Monitor_NavShop/<?= htmlspecialchars($_SESSION['user']['avatar']) ?>"
-                                alt="Avatar"
-                                class="rounded-circle"
-                                style="width:32px; height:32px; object-fit:cover;">
-                        </li>
+                        <img src="/<?= htmlspecialchars($_SESSION['user']['avatar']) ?>"
+                             class="nav-avatar" alt="Avatar">
                     <?php endif; ?>
 
-                    <!-- PROFILE (CHỈ USER) -->
                     <?php if ($_SESSION['user']['role'] === 'user'): ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/Project_Monitor_NavShop/users/profile.php">
-                                Profile
-                            </a>
-                        </li>
+                        <a class="nav-link" href="/users/profile.php">Profile</a>
                     <?php endif; ?>
 
-                    <!-- LOGOUT -->
-                    <li class="nav-item ms-2">
-                        <a href="/Project_Monitor_NavShop/auth/logout.php"
-                           class="btn btn-outline-light btn-sm">
-                            Logout
-                        </a>
-                    </li>
-
+                    <a href="/auth/logout.php" class="btn-nav">Logout</a>
                 <?php endif; ?>
-
-            </ul>
+            </div>
 
         </div>
     </div>
 </nav>
 
-<div class="container mt-4">
+<div class="main-content">
+<div class="container">

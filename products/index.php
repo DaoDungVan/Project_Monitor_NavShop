@@ -1,17 +1,14 @@
 <?php
-// ================= PHẦN LOGIC (LUÔN Ở TRÊN CÙNG) =================
 session_start();
 
-// Nếu admin truy cập shop user → đá sang admin panel
 if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'admin') {
     header('Location: admin_index.php');
     exit;
 }
 
-// Kết nối database
 require_once '../config/db.php';
 
-// ================= FILTER =================
+// ===== FILTER =====
 $keyword    = trim($_GET['keyword'] ?? '');
 $size       = trim($_GET['size'] ?? '');
 $resolution = trim($_GET['resolution'] ?? '');
@@ -20,215 +17,155 @@ $min_price  = trim($_GET['min_price'] ?? '');
 $max_price  = trim($_GET['max_price'] ?? '');
 $sort_price = trim($_GET['sort_price'] ?? '');
 
-// ================= PHÂN TRANG =================
-$limit = 18;
-$page = $_GET['page'] ?? 1;
-$page = max(1, (int)$page);
+// ===== PAGINATION =====
+$limit  = 18;
+$page   = max(1, (int)($_GET['page'] ?? 1));
 $offset = ($page - 1) * $limit;
 
-// ================= BUILD WHERE =================
-$where = " WHERE 1=1";
+// ===== BUILD WHERE =====
+$where  = " WHERE 1=1";
 $params = [];
 
-// Search name
-if ($keyword !== '') {
-    $where .= " AND name LIKE ?";
-    $params[] = '%' . $keyword . '%';
-}
+if ($keyword !== '') { $where .= " AND name LIKE ?"; $params[] = '%' . $keyword . '%'; }
+if ($size    !== '') { $where .= " AND size = ?";    $params[] = $size; }
+if ($resolution !== '') { $where .= " AND resolution = ?"; $params[] = $resolution; }
+if ($panel   !== '') { $where .= " AND panel = ?";   $params[] = $panel; }
+if ($min_price !== '') { $where .= " AND price >= ?"; $params[] = $min_price; }
+if ($max_price !== '') { $where .= " AND price <= ?"; $params[] = $max_price; }
 
-// Filter size
-if ($size !== '') {
-    $where .= " AND size = ?";
-    $params[] = $size;
-}
+$orderBy = " ORDER BY id DESC";
+if ($sort_price === 'asc')  $orderBy = " ORDER BY price ASC";
+if ($sort_price === 'desc') $orderBy = " ORDER BY price DESC";
 
-// Filter resolution
-if ($resolution !== '') {
-    $where .= " AND resolution = ?";
-    $params[] = $resolution;
-}
-
-// Filter panel
-if ($panel !== '') {
-    $where .= " AND panel = ?";
-    $params[] = $panel;
-}
-
-// Filter price
-if ($min_price !== '') {
-    $where .= " AND price >= ?";
-    $params[] = $min_price;
-}
-if ($max_price !== '') {
-    $where .= " AND price <= ?";
-    $params[] = $max_price;
-}
-
-// ================= SORT =================
-$orderBy = " ORDER BY id DESC"; // mặc định: sản phẩm mới nhất
-
-if ($sort_price === 'asc') {
-    $orderBy = " ORDER BY price ASC";
-} elseif ($sort_price === 'desc') {
-    $orderBy = " ORDER BY price DESC";
-}
-
-// ================= COUNT TOTAL =================
-$countSql = "SELECT COUNT(*) FROM products" . $where;
-$stmtCount = $conn->prepare($countSql);
+// ===== COUNT =====
+$stmtCount = $conn->prepare("SELECT COUNT(*) FROM products" . $where);
 $stmtCount->execute($params);
 $totalProducts = $stmtCount->fetchColumn();
-$totalPages = ceil($totalProducts / $limit);
+$totalPages    = ceil($totalProducts / $limit);
 
-// ================= GET PRODUCTS =================
-$sql = "SELECT * FROM products" . $where . $orderBy . " LIMIT $limit OFFSET $offset";
-$stmt = $conn->prepare($sql);
+// ===== GET PRODUCTS =====
+$stmt = $conn->prepare("SELECT * FROM products" . $where . $orderBy . " LIMIT $limit OFFSET $offset");
 $stmt->execute($params);
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// ================= HEADER =================
 require_once '../includes/header_user.php';
 ?>
 
-<h2 class="mb-4">Monitor Shop</h2>
+<h1 class="page-title">Monitor Shop</h1>
 
-<!-- FILTER FORM -->
-<form method="GET" class="row mb-4">
+<!-- FILTER -->
+<div class="filter-bar">
+    <form method="GET">
+        <div class="filter-row">
+            <input type="text" name="keyword" class="form-control"
+                   placeholder="Search by name..."
+                   value="<?= htmlspecialchars($keyword) ?>">
 
-    <div class="col-md-3">
-        <input type="text" name="keyword" class="form-control"
-            placeholder="Search by name..."
-            value="<?= htmlspecialchars($keyword) ?>">
-    </div>
+            <input type="number" name="min_price" class="form-control"
+                   placeholder="Min price"
+                   value="<?= htmlspecialchars($min_price) ?>">
 
-    <div class="col-md-2">
-        <input type="number" name="min_price" class="form-control"
-            placeholder="Min price"
-            value="<?= htmlspecialchars($min_price) ?>">
-    </div>
+            <input type="number" name="max_price" class="form-control"
+                   placeholder="Max price"
+                   value="<?= htmlspecialchars($max_price) ?>">
 
-    <div class="col-md-2">
-        <input type="number" name="max_price" class="form-control"
-            placeholder="Max price"
-            value="<?= htmlspecialchars($max_price) ?>">
-    </div>
+            <select name="sort_price" class="form-control">
+                <option value="">Sort by price</option>
+                <option value="asc"  <?= $sort_price === 'asc'  ? 'selected' : '' ?>>Price: Low → High</option>
+                <option value="desc" <?= $sort_price === 'desc' ? 'selected' : '' ?>>Price: High → Low</option>
+            </select>
+        </div>
 
-    <div class="col-md-3">
-        <select name="sort_price" class="form-control">
-            <option value="">Sort by price</option>
-            <option value="asc" <?= $sort_price === 'asc' ? 'selected' : '' ?>>
-                Price: Low → High
-            </option>
-            <option value="desc" <?= $sort_price === 'desc' ? 'selected' : '' ?>>
-                Price: High → Low
-            </option>
-        </select>
-    </div>
+        <div class="filter-row2">
+            <select name="size" class="form-control">
+                <option value="">All Sizes</option>
+                <option value="24" <?= $size == 24 ? 'selected' : '' ?>>24 inch</option>
+                <option value="27" <?= $size == 27 ? 'selected' : '' ?>>27 inch</option>
+                <option value="32" <?= $size == 32 ? 'selected' : '' ?>>32 inch</option>
+            </select>
 
-    <div class="col-md-3 mt-3">
-        <select name="size" class="form-control">
-            <option value="">All Sizes</option>
-            <option value="24" <?= $size == 24 ? 'selected' : '' ?>>24 inch</option>
-            <option value="27" <?= $size == 27 ? 'selected' : '' ?>>27 inch</option>
-            <option value="32" <?= $size == 32 ? 'selected' : '' ?>>32 inch</option>
-        </select>
-    </div>
+            <select name="resolution" class="form-control">
+                <option value="">All Resolution</option>
+                <option value="FHD"  <?= $resolution === 'FHD'  ? 'selected' : '' ?>>Full HD</option>
+                <option value="2K"   <?= $resolution === '2K'   ? 'selected' : '' ?>>2K</option>
+                <option value="4K"   <?= $resolution === '4K'   ? 'selected' : '' ?>>4K</option>
+            </select>
 
-    <div class="col-md-3 mt-3">
-        <select name="resolution" class="form-control">
-            <option value="">All Resolution</option>
-            <option value="FHD" <?= $resolution == 'FHD' ? 'selected' : '' ?>>Full HD</option>
-            <option value="2K" <?= $resolution == '2K' ? 'selected' : '' ?>>2K</option>
-            <option value="4K" <?= $resolution == '4K' ? 'selected' : '' ?>>4K</option>
-        </select>
-    </div>
+            <select name="panel" class="form-control">
+                <option value="">All Panel</option>
+                <option value="IPS"  <?= $panel === 'IPS'  ? 'selected' : '' ?>>IPS</option>
+                <option value="VA"   <?= $panel === 'VA'   ? 'selected' : '' ?>>VA</option>
+                <option value="OLED" <?= $panel === 'OLED' ? 'selected' : '' ?>>OLED</option>
+            </select>
 
-    <div class="col-md-3 mt-3">
-        <select name="panel" class="form-control">
-            <option value="">All Panel</option>
-            <option value="IPS" <?= $panel == 'IPS' ? 'selected' : '' ?>>IPS</option>
-            <option value="VA" <?= $panel == 'VA' ? 'selected' : '' ?>>VA</option>
-            <option value="OLED" <?= $panel == 'OLED' ? 'selected' : '' ?>>OLED</option>
-        </select>
-    </div>
+            <button type="submit" class="btn btn-green">Filter</button>
+        </div>
+    </form>
+</div>
 
-    <div class="col-md-3 mt-3">
-        <button class="btn btn-primary w-100" style="background:#20b462;border:none">
-            Filter
-        </button>
-    </div>
+<!-- PRODUCT GRID -->
+<?php if (empty($products)): ?>
+    <p class="no-products">No products found.</p>
+<?php else: ?>
+<div class="product-grid">
+    <?php foreach ($products as $p): ?>
+        <div class="card">
+            <?php if ($p['image']): ?>
+                <a href="show.php?id=<?= $p['id'] ?>">
+                    <img src="../<?= htmlspecialchars($p['image']) ?>"
+                         class="card-img" alt="<?= htmlspecialchars($p['name']) ?>">
+                </a>
+            <?php endif; ?>
 
-</form>
-
-<!-- PRODUCT LIST -->
-<div class="row">
-    <?php if (empty($products)): ?>
-        <p>No products found</p>
-    <?php endif; ?>
-
-    <?php foreach ($products as $product): ?>
-        <div class="col-md-4 mb-4">
-            <div class="card h-100" style="border-radius:15px">
-
-                <?php if ($product['image']): ?>
-                    <a href="show.php?id=<?= $product['id'] ?>">
-                        <img src="../<?= htmlspecialchars($product['image']) ?>"
-                            class="card-img-top"
-                            style="height:200px;object-fit:contain">
+            <div class="card-body">
+                <div class="card-name">
+                    <a href="show.php?id=<?= $p['id'] ?>">
+                        <?= htmlspecialchars($p['name']) ?>
                     </a>
-                <?php endif; ?>
+                </div>
 
-                <div class="card-body">
-                    <h5>
-                        <a href="show.php?id=<?= $product['id'] ?>"
-                            style="text-decoration:none;color:inherit">
-                            <?= htmlspecialchars($product['name']) ?>
-                        </a>
-                    </h5>
-
-                    <div style="background-color: #e9e9e9; padding: 10px; border-radius: 15px; margin-bottom: 10px; 
-                    display: flex; justify-content: center; align-items: flex-start; gap: 70px;">
-                        <p class="card-text">
-                            Brand: <?= htmlspecialchars($product['brand']) ?><br>
-                            Size: <?= $product['size'] ?> inch<br>
-                            Resolution: <?= htmlspecialchars($product['resolution']) ?><br>
-                        </p>
-                        <p class="card-text">
-                            Panel: <?= htmlspecialchars($product['panel']) ?><br>
-                            Screen: <?= $product['is_curved'] ? 'Curved' : 'Flat' ?>
-                        </p>
+                <div class="card-specs">
+                    <div>
+                        Brand: <?= htmlspecialchars($p['brand']) ?><br>
+                        Size: <?= $p['size'] ?> inch<br>
+                        Resolution: <?= htmlspecialchars($p['resolution']) ?>
                     </div>
+                    <div>
+                        Panel: <?= htmlspecialchars($p['panel']) ?><br>
+                        Screen: <?= $p['is_curved'] ? 'Curved' : 'Flat' ?>
+                    </div>
+                </div>
 
-                    <strong style="color:#E30019; text-align:center; display:block; font-size:18px;">
-                        <?= number_format($product['price']) ?> VND
-                    </strong>
+                <div class="card-price">
+                    <?= number_format($p['price']) ?> VND
                 </div>
             </div>
         </div>
     <?php endforeach; ?>
 </div>
+<?php endif; ?>
 
 <!-- PAGINATION -->
 <?php if ($totalPages > 1): ?>
-    <nav>
-        <ul class="pagination justify-content-center">
-            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <li class="page-item <?= $i == $page ? 'active' : '' ?>">
-                    <a class="page-link"
-                        href="?page=<?= $i ?>
-                   &keyword=<?= urlencode($keyword) ?>
-                   &size=<?= urlencode($size) ?>
-                   &resolution=<?= urlencode($resolution) ?>
-                   &panel=<?= urlencode($panel) ?>
-                   &min_price=<?= urlencode($min_price) ?>
-                   &max_price=<?= urlencode($max_price) ?>
-                   &sort_price=<?= urlencode($sort_price) ?>">
-                        <?= $i ?>
-                    </a>
-                </li>
-            <?php endfor; ?>
-        </ul>
-    </nav>
+<nav class="pagination">
+    <?php
+    $queryBase = http_build_query(array_filter([
+        'keyword'    => $keyword,
+        'size'       => $size,
+        'resolution' => $resolution,
+        'panel'      => $panel,
+        'min_price'  => $min_price,
+        'max_price'  => $max_price,
+        'sort_price' => $sort_price,
+    ]));
+    for ($i = 1; $i <= $totalPages; $i++):
+    ?>
+        <a class="page-link <?= $i == $page ? 'active' : '' ?>"
+           href="?page=<?= $i ?><?= $queryBase ? '&' . $queryBase : '' ?>">
+            <?= $i ?>
+        </a>
+    <?php endfor; ?>
+</nav>
 <?php endif; ?>
 
 <?php require_once '../includes/footer.php'; ?>

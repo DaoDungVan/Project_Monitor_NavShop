@@ -1,24 +1,17 @@
 <?php
-// ================= PRODUCT DETAIL =================
 session_start();
-
-// Kết nối database
 require_once '../config/db.php';
 
-// Kiểm tra có id không
 if (!isset($_GET['id'])) {
     header('Location: index.php');
     exit;
 }
 
-$id = (int)$_GET['id'];
-
-// Lấy thông tin sản phẩm
+$id   = (int)$_GET['id'];
 $stmt = $conn->prepare("SELECT * FROM products WHERE id = ?");
 $stmt->execute([$id]);
 $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Không có sản phẩm thì quay về shop
 if (!$product) {
     header('Location: index.php');
     exit;
@@ -27,52 +20,46 @@ if (!$product) {
 require_once '../includes/header_user.php';
 ?>
 
-<h2><?= htmlspecialchars($product['name']) ?></h2>
+<h1 class="page-title"><?= htmlspecialchars($product['name']) ?></h1>
 
-<div class="row">
+<div class="detail-grid">
 
-    <!-- ẢNH -->
-    <div class="col-md-5">
+    <!-- IMAGE -->
+    <div class="detail-img-wrap">
         <?php if ($product['image']): ?>
             <img src="../<?= htmlspecialchars($product['image']) ?>"
-                 class="img-fluid border rounded">
+                 alt="<?= htmlspecialchars($product['name']) ?>">
         <?php else: ?>
-            <p>No image</p>
+            <p class="text-muted" style="padding:40px;text-align:center;">No image available</p>
         <?php endif; ?>
     </div>
 
-    <!-- THÔNG TIN -->
-    <div class="col-md-7">
+    <!-- INFO -->
+    <div>
+        <div class="detail-price"><?= number_format($product['price']) ?> VND</div>
 
-        <h4 style="color:#E30019">
-            <?= number_format($product['price']) ?> VND
-        </h4>
-
-        <ul class="list-group mb-3">
-            <li class="list-group-item"><strong>Brand:</strong> <?= htmlspecialchars($product['brand']) ?></li>
-            <li class="list-group-item"><strong>Size:</strong> <?= $product['size'] ?> inch</li>
-            <li class="list-group-item"><strong>Resolution:</strong> <?= htmlspecialchars($product['resolution']) ?></li>
-            <li class="list-group-item"><strong>Panel:</strong> <?= htmlspecialchars($product['panel']) ?></li>
-            <li class="list-group-item">
-                <strong>Screen:</strong>
-                <?= $product['is_curved'] ? 'Curved' : 'Flat' ?>
-            </li>
-        </ul>
+        <table class="specs-table">
+            <tr><td>Brand</td>      <td><?= htmlspecialchars($product['brand']) ?></td></tr>
+            <tr><td>Size</td>       <td><?= $product['size'] ?> inch</td></tr>
+            <tr><td>Resolution</td> <td><?= htmlspecialchars($product['resolution']) ?></td></tr>
+            <tr><td>Panel</td>      <td><?= htmlspecialchars($product['panel']) ?></td></tr>
+            <tr><td>Screen</td>     <td><?= $product['is_curved'] ? 'Curved' : 'Flat' ?></td></tr>
+        </table>
 
         <?php if ($product['description']): ?>
-            <p><?= nl2br(htmlspecialchars($product['description'])) ?></p>
+            <p class="detail-desc"><?= nl2br(htmlspecialchars($product['description'])) ?></p>
         <?php endif; ?>
 
-        <a href="../cart/add.php?id=<?= $product['id'] ?>"
-           class="btn btn-success" style="background-color: #20b462; border: none;">
-            Add to cart
-        </a>
-
-        <a href="index.php" class="btn btn-secondary" style="background-color: #E30019; border: none;">
-            Back to shop
-        </a>
-
+        <div class="detail-actions">
+            <a href="../cart/add.php?id=<?= $product['id'] ?>" class="btn btn-green">
+                Add to Cart
+            </a>
+            <a href="index.php" class="btn btn-gray">
+                ← Back to Shop
+            </a>
+        </div>
     </div>
+
 </div>
 
 <?php require_once '../includes/footer.php'; ?>

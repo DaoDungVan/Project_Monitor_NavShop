@@ -1,8 +1,6 @@
 <?php
-// ================= USER ORDER HISTORY =================
 session_start();
 
-// Chưa login thì đá về login
 if (!isset($_SESSION['user'])) {
     header('Location: ../auth/login.php');
     exit;
@@ -12,45 +10,41 @@ require_once '../config/db.php';
 
 $userId = $_SESSION['user']['id'];
 
-// Lấy danh sách đơn hàng của user
-$stmt = $conn->prepare("
-    SELECT * FROM orders
-    WHERE user_id = ?
-    ORDER BY created_at DESC
-");
+$stmt = $conn->prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC");
 $stmt->execute([$userId]);
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+require_once '../includes/header_user.php';
 ?>
 
-<?php require_once '../includes/header_user.php'; ?>
-
-<h2>My Orders</h2>
+<h1 class="page-title">My Orders</h1>
 
 <?php if (empty($orders)): ?>
-    <p>You have no orders.</p>
+    <div class="cart-empty">
+        <p>You have no orders yet.</p>
+        <p class="mt-2"><a href="/products/index.php">← Start Shopping</a></p>
+    </div>
 <?php else: ?>
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Order ID</th>
-            <th>Total Price</th>
-            <th>Date</th>
-        </tr>
-    </thead>
-    <tbody>
-
-    <?php foreach ($orders as $order): ?>
-        <tr>
-            <td>#<?= $order['id'] ?></td>
-            <td><?= number_format($order['total_price']) ?> VND</td>
-            <td><?= $order['created_at'] ?></td>
-        </tr>
-    <?php endforeach; ?>
-
-    </tbody>
-</table>
-<?php require_once '../includes/footer.php'; ?>
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Total Price</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($orders as $order): ?>
+                    <tr>
+                        <td><strong>#<?= $order['id'] ?></strong></td>
+                        <td class="cart-total-price"><?= number_format($order['total_price']) ?> VND</td>
+                        <td class="text-muted"><?= $order['created_at'] ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
 <?php endif; ?>
 
-
+<?php require_once '../includes/footer.php'; ?>
