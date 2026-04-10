@@ -11,7 +11,8 @@ require_once '../includes/upload.php';
 
 $userId  = $_SESSION['user']['id'];
 $error   = '';
-$success = '';
+$success = $_SESSION['profile_success'] ?? '';
+unset($_SESSION['profile_success']);
 
 $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
 $stmt->execute([$userId]);
@@ -26,11 +27,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name       = trim($_POST['name'] ?? '');
     $phone      = trim($_POST['phone'] ?? '');
     $address    = trim($_POST['address'] ?? '');
-    $gender     = $_POST['gender'] ?? null;
+    $gender     = trim($_POST['gender'] ?? '');
     $avatarPath = $user['avatar'];
+
+    if ($gender === '') {
+        $gender = null;
+    }
 
     if ($name === '') {
         $error = 'Name is required.';
+    } elseif ($gender !== null && !in_array($gender, ['male', 'female', 'other'], true)) {
+        $error = 'Please select a valid gender.';
     } else {
         if (!empty($_FILES['avatar']['name'])) {
             $newAvatarPath = save_uploaded_image('avatar', '../uploads/avatars', 'uploads/avatars', $error);
@@ -46,12 +53,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $_SESSION['user']['name']   = $name;
             $_SESSION['user']['avatar'] = $avatarPath;
+            $_SESSION['profile_success'] = 'Profile updated successfully.';
 
-            $success = 'Profile updated successfully.';
-
-            $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
-            $stmt->execute([$userId]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            header('Location: profile.php');
+            exit;
         }
     }
 }
@@ -59,7 +64,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once '../includes/header_user.php';
 ?>
 
-<h1 class="page-title">My Profile</h1>
+<div class="page-header-bar">
+    <div>
+        <p class="eyebrow">Account</p>
+        <h1 class="page-title">My Profile</h1>
+        <p class="page-subtitle">Update your personal information and avatar.</p>
+    </div>
+    <a href="../products/index.php" class="btn btn-gray">Back to shop</a>
+</div>
 
 <div class="profile-card">
 
