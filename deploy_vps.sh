@@ -23,6 +23,8 @@ if [ -z "$DB_PASS" ]; then
     DB_PASS="$(openssl rand -hex 18 2>/dev/null || date +%s%N)"
 fi
 
+git config --global --add safe.directory "$APP_DIR" >/dev/null 2>&1 || true
+
 if ! command -v git >/dev/null 2>&1; then
     apt-get update
     apt-get install -y git
