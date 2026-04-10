@@ -27,6 +27,7 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
             <div class="navbar-nav">
                 <a class="nav-link" href="/products/admin_index.php">Products</a>
                 <a class="nav-link" href="/orders/admin_index.php">Orders</a>
+                <a class="nav-link" href="/chat/admin.php">Live Chat</a>
                 <span class="nav-text">
                     <?= htmlspecialchars($_SESSION['user']['name']) ?>
                 </span>

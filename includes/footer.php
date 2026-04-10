@@ -1,6 +1,8 @@
 </div><!-- /container -->
 </div><!-- /main-content -->
 
+<?php require_once __DIR__ . '/../chat/widget.php'; ?>
+
 <footer class="footer">
     <div class="container">
         <div class="footer-grid">
