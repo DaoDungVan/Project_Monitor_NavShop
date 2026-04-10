@@ -812,6 +812,7 @@ textarea.form-control {
 
 /* Toggle button */
 .chat-toggle {
+    position: relative;
     width: 60px;
     height: 60px;
     border: 0;
@@ -855,29 +856,28 @@ textarea.form-control {
 
 /* Chat panel */
 .chat-panel {
+    display: none;
     position: absolute;
     right: 0;
     bottom: 72px;
     width: min(360px, calc(100vw - 32px));
     height: 520px;
-    display: flex;
     flex-direction: column;
     overflow: hidden;
     background: #fff;
     border: 1px solid var(--border);
     border-radius: 16px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.14), 0 4px 16px rgba(0,0,0,0.08);
-    opacity: 0;
-    transform: translateY(16px) scale(0.97);
-    pointer-events: none;
-    transition: opacity 0.22s ease, transform 0.22s ease;
-    transform-origin: bottom right;
 }
 
 .chat-widget.is-open .chat-panel {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    pointer-events: auto;
+    display: flex;
+    animation: chatPanelIn 0.22s ease forwards;
+}
+
+@keyframes chatPanelIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* Chat header */
