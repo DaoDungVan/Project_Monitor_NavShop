@@ -8,7 +8,6 @@ if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'admin') {
 
 require_once '../config/db.php';
 
-// ===== FILTER =====
 $keyword    = trim($_GET['keyword'] ?? '');
 $size       = trim($_GET['size'] ?? '');
 $resolution = trim($_GET['resolution'] ?? '');
@@ -17,33 +16,33 @@ $min_price  = trim($_GET['min_price'] ?? '');
 $max_price  = trim($_GET['max_price'] ?? '');
 $sort_price = trim($_GET['sort_price'] ?? '');
 
-// ===== PAGINATION =====
 $limit  = 18;
 $page   = max(1, (int)($_GET['page'] ?? 1));
 $offset = ($page - 1) * $limit;
 
-// ===== BUILD WHERE =====
 $where  = " WHERE 1=1";
 $params = [];
 
 if ($keyword !== '') { $where .= " AND name LIKE ?"; $params[] = '%' . $keyword . '%'; }
-if ($size    !== '') { $where .= " AND size = ?";    $params[] = $size; }
+if ($size !== '') { $where .= " AND size = ?"; $params[] = $size; }
 if ($resolution !== '') { $where .= " AND resolution = ?"; $params[] = $resolution; }
-if ($panel   !== '') { $where .= " AND panel = ?";   $params[] = $panel; }
+if ($panel !== '') { $where .= " AND panel = ?"; $params[] = $panel; }
 if ($min_price !== '') { $where .= " AND price >= ?"; $params[] = $min_price; }
 if ($max_price !== '') { $where .= " AND price <= ?"; $params[] = $max_price; }
 
 $orderBy = " ORDER BY id DESC";
-if ($sort_price === 'asc')  $orderBy = " ORDER BY price ASC";
-if ($sort_price === 'desc') $orderBy = " ORDER BY price DESC";
+if ($sort_price === 'asc') {
+    $orderBy = " ORDER BY price ASC";
+}
+if ($sort_price === 'desc') {
+    $orderBy = " ORDER BY price DESC";
+}
 
-// ===== COUNT =====
 $stmtCount = $conn->prepare("SELECT COUNT(*) FROM products" . $where);
 $stmtCount->execute($params);
-$totalProducts = $stmtCount->fetchColumn();
-$totalPages    = ceil($totalProducts / $limit);
+$totalProducts = (int)$stmtCount->fetchColumn();
+$totalPages    = (int)ceil($totalProducts / $limit);
 
-// ===== GET PRODUCTS =====
 $stmt = $conn->prepare("SELECT * FROM products" . $where . $orderBy . " LIMIT $limit OFFSET $offset");
 $stmt->execute($params);
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -51,9 +50,15 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 require_once '../includes/header_user.php';
 ?>
 
-<h1 class="page-title">Monitor Shop</h1>
+<div class="shop-heading">
+    <div>
+        <p class="eyebrow">Monitor store</p>
+        <h1 class="page-title">Find the right monitor</h1>
+        <p class="page-subtitle">Filter by size, resolution, panel, and price.</p>
+    </div>
+    <a href="../cart/index.php" class="btn btn-navy">View Cart</a>
+</div>
 
-<!-- FILTER -->
 <div class="filter-bar">
     <form method="GET">
         <div class="filter-row">
@@ -71,8 +76,8 @@ require_once '../includes/header_user.php';
 
             <select name="sort_price" class="form-control">
                 <option value="">Sort by price</option>
-                <option value="asc"  <?= $sort_price === 'asc'  ? 'selected' : '' ?>>Price: Low → High</option>
-                <option value="desc" <?= $sort_price === 'desc' ? 'selected' : '' ?>>Price: High → Low</option>
+                <option value="asc"  <?= $sort_price === 'asc'  ? 'selected' : '' ?>>Price: Low to High</option>
+                <option value="desc" <?= $sort_price === 'desc' ? 'selected' : '' ?>>Price: High to Low</option>
             </select>
         </div>
 
@@ -99,11 +104,11 @@ require_once '../includes/header_user.php';
             </select>
 
             <button type="submit" class="btn btn-green">Filter</button>
+            <a href="index.php" class="btn btn-gray">Reset</a>
         </div>
     </form>
 </div>
 
-<!-- PRODUCT GRID -->
 <?php if (empty($products)): ?>
     <p class="no-products">No products found.</p>
 <?php else: ?>
@@ -115,6 +120,8 @@ require_once '../includes/header_user.php';
                     <img src="../<?= htmlspecialchars($p['image']) ?>"
                          class="card-img" alt="<?= htmlspecialchars($p['name']) ?>">
                 </a>
+            <?php else: ?>
+                <a href="show.php?id=<?= $p['id'] ?>" class="card-img card-img-empty">No image</a>
             <?php endif; ?>
 
             <div class="card-body">
@@ -139,13 +146,17 @@ require_once '../includes/header_user.php';
                 <div class="card-price">
                     <?= number_format($p['price']) ?> VND
                 </div>
+
+                <div class="card-actions">
+                    <a href="show.php?id=<?= $p['id'] ?>" class="btn btn-gray btn-sm">View details</a>
+                    <a href="../cart/add.php?id=<?= $p['id'] ?>" class="btn btn-green btn-sm">Add to cart</a>
+                </div>
             </div>
         </div>
     <?php endforeach; ?>
 </div>
 <?php endif; ?>
 
-<!-- PAGINATION -->
 <?php if ($totalPages > 1): ?>
 <nav class="pagination">
     <?php

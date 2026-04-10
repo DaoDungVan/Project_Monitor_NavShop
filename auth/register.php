@@ -13,14 +13,19 @@ $error   = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name     = trim($_POST['name'] ?? '');
-    $email    = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
+    $name            = trim($_POST['name'] ?? '');
+    $email           = trim($_POST['email'] ?? '');
+    $password        = $_POST['password'] ?? '';
+    $confirmPassword = $_POST['confirm_password'] ?? '';
 
-    if ($name === '' || $email === '' || $password === '') {
+    if ($name === '' || $email === '' || $password === '' || $confirmPassword === '') {
         $error = 'Please fill all required fields.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = 'Please enter a valid email address.';
     } elseif (strlen($password) < 6) {
         $error = 'Password must be at least 6 characters.';
+    } elseif ($password !== $confirmPassword) {
+        $error = 'Password confirmation does not match.';
     } else {
         $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
         $stmt->execute([$email]);
@@ -41,16 +46,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register – NavShop</title>
+    <title>Register - NavShop</title>
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
 
 <div class="auth-page">
-    <div class="auth-card">
+    <a href="../products/index.php" class="auth-home-link">Back to shop</a>
 
+    <div class="auth-card">
         <div class="auth-logo"><span>NavShop</span></div>
-        <p class="auth-subtitle">Create a new account</p>
+        <p class="auth-subtitle">Create an account for faster checkout</p>
 
         <?php if ($error): ?>
             <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
@@ -59,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if ($success): ?>
             <div class="alert alert-success">
                 <?= htmlspecialchars($success) ?>
-                <br><a href="login.php" class="auth-link">Go to Login →</a>
+                <br><a href="login.php" class="auth-link">Go to login</a>
             </div>
         <?php endif; ?>
 
@@ -81,8 +87,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" name="password" class="form-control"
-                       placeholder="Min. 6 characters" required>
+                <div class="password-field">
+                    <input type="password" name="password" id="register-password" class="form-control"
+                           placeholder="Min. 6 characters" required>
+                    <button type="button" class="password-toggle" data-toggle-password="register-password">Show</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <div class="password-field">
+                    <input type="password" name="confirm_password" id="register-confirm-password" class="form-control"
+                           placeholder="Repeat password" required>
+                    <button type="button" class="password-toggle" data-toggle-password="register-confirm-password">Show</button>
+                </div>
             </div>
 
             <button type="submit" class="btn btn-green btn-block">Register</button>
@@ -93,9 +111,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Already have an account?
             <a href="login.php" class="auth-link">Login</a>
         </div>
-
     </div>
 </div>
 
+<script src="../assets/js/main.js"></script>
 </body>
 </html>

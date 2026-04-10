@@ -44,16 +44,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login – NavShop</title>
+    <title>Login - NavShop</title>
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
 
 <div class="auth-page">
-    <div class="auth-card">
+    <a href="../products/index.php" class="auth-home-link">Back to shop</a>
 
+    <div class="auth-card">
         <div class="auth-logo"><span>NavShop</span></div>
-        <p class="auth-subtitle">Sign in to your account</p>
+        <p class="auth-subtitle">Sign in to continue shopping</p>
 
         <?php if (!empty($_SESSION['error'])): ?>
             <div class="alert alert-warning"><?= htmlspecialchars($_SESSION['error']) ?></div>
@@ -74,8 +75,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" name="password" class="form-control"
-                       placeholder="••••••••" required>
+                <div class="password-field">
+                    <input type="password" name="password" id="login-password" class="form-control"
+                           placeholder="Password" required>
+                    <button type="button" class="password-toggle" data-toggle-password="login-password">Show</button>
+                </div>
             </div>
 
             <button type="submit" class="btn btn-green btn-block">Login</button>
@@ -85,9 +89,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Don't have an account?
             <a href="register.php" class="auth-link">Register</a>
         </div>
-
     </div>
 </div>
 
+<script src="../assets/js/main.js"></script>
 </body>
 </html>
