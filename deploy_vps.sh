@@ -72,6 +72,11 @@ if [ "$TABLE_COUNT" = "0" ]; then
     mysql -u root "$DB_NAME" < "$APP_DIR/database.sql"
 fi
 
+PRODUCT_COUNT="$(mysql -N -B -u root -e "SELECT COUNT(*) FROM $DB_NAME.products;" 2>/dev/null || echo 0)"
+if [ "$PRODUCT_COUNT" = "0" ] && [ -f "$APP_DIR/database_seed.sql" ]; then
+    mysql -u root "$DB_NAME" < "$APP_DIR/database_seed.sql"
+fi
+
 cat > /etc/nginx/sites-available/navshop <<NGINX
 server {
     listen 80;

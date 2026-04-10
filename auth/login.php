@@ -58,10 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h1>Ready for your next display.</h1>
                 <p>Compare gaming, design, and office monitors with saved carts and order history.</p>
             </div>
-            <div class="auth-product-shot">
-                <img src="../uploads/products/1770146526_-va3209-2k-mhd-32-ips-2k-75hz-hdr10-1_0effa43fb278449591e2d0e3c740f46f_be87b0c390f546dcb27e3b5c42697b01_master.jpg"
-                     alt="ViewSonic monitor">
-            </div>
             <div class="auth-spec-row">
                 <span>IPS</span>
                 <span>2K</span>

@@ -60,10 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h1>Build your monitor shortlist.</h1>
                 <p>Save your profile, checkout faster, and keep your orders in one place.</p>
             </div>
-            <div class="auth-product-shot">
-                <img src="../uploads/products/1770146173_aorus_fo27q5p_gearvn_126548821d8342ea862b394c11a839fe_master.jpg"
-                     alt="AORUS monitor">
-            </div>
             <div class="auth-spec-row">
                 <span>OLED</span>
                 <span>2K</span>
